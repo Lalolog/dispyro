@@ -1,8 +1,10 @@
 from functools import cached_property
 from typing import Any, Awaitable, Callable, Dict, List, Optional, Type, Union
 
-from pyrogram import Client, handlers, idle
+from pyrogram import handlers
+from pyrogram.client import Client
 from pyrogram.handlers.handler import Handler as PyrogramHandler
+from pyrogram.methods.utilities.idle import idle
 from pyrogram.raw import base, core
 
 from .enums import RunLogic
@@ -12,7 +14,9 @@ from .types import PackedRawUpdate, Update
 from .types.contexts import UpdateContext
 
 PyrogramHandlerCallback = Callable[[Client, Update], Awaitable[Any]]
-PyrogramRawHandlerCallback = Callable[[Client, core.TLObject, Dict[int, base.User], Dict[int, base.Chat]], Awaitable]
+PyrogramRawHandlerCallback = Callable[
+    [Client, core.TLObject, Dict[int, base.User], Dict[int, base.Chat]], Awaitable
+]
 AnyPyrogramHandlerCallback = Union[PyrogramHandlerCallback, PyrogramRawHandlerCallback]
 
 
@@ -53,11 +57,15 @@ class Dispatcher:
 
         else:
             for client in clients:
-                client = self.prepare_client(client=client, clear_handlers=clear_on_prepare)
+                client = self.prepare_client(
+                    client=client, clear_handlers=clear_on_prepare
+                )
                 self._clients.append(client)
 
     @cached_property
-    def processing_context_correlation(self) -> Dict[Type[PyrogramHandler], ProcessingContextHolder]:
+    def processing_context_correlation(
+        self,
+    ) -> Dict[Type[PyrogramHandler], ProcessingContextHolder]:
         return {
             handlers.CallbackQueryHandler: self.callback_query,
             handlers.ChatMemberUpdatedHandler: self.chat_member_updated,
@@ -71,7 +79,9 @@ class Dispatcher:
             handlers.UserStatusHandler: self.user_status,
         }
 
-    def _make_handler(self, handler_type: Type[PyrogramHandler]) -> AnyPyrogramHandlerCallback:
+    def _make_handler(
+        self, handler_type: Type[PyrogramHandler]
+    ) -> AnyPyrogramHandlerCallback:
         if handler_type is handlers.RawUpdateHandler:
 
             async def handler(
@@ -81,12 +91,16 @@ class Dispatcher:
                 chats: Dict[int, base.Chat],
             ):
                 packed_update = PackedRawUpdate(update=update, users=users, chats=chats)
-                await self.feed_update(client=client, update=packed_update, handler_type=handler_type)
+                await self.feed_update(
+                    client=client, update=packed_update, handler_type=handler_type
+                )
 
         else:
 
             async def handler(client: Client, update: Update):
-                await self.feed_update(client=client, update=update, handler_type=handler_type)
+                await self.feed_update(
+                    client=client, update=update, handler_type=handler_type
+                )
 
         return handler
 
@@ -132,7 +146,9 @@ class Dispatcher:
         for router in self.routers:
             router.cleanup()
 
-    async def feed_update(self, client: Client, update: Update, handler_type: Type[PyrogramHandler]) -> None:
+    async def feed_update(
+        self, client: Client, update: Update, handler_type: Type[PyrogramHandler]
+    ) -> None:
         processing_context = self.processing_context_correlation[handler_type]
         context = UpdateContext(client=client, update=update, data=self._deps)
 
@@ -148,7 +164,9 @@ class Dispatcher:
             await middleware.handle(context=context)
 
         for router in self.routers:
-            result = await router.feed_update(context=context, dispatcher=self, handler_type=handler_type)
+            result = await router.feed_update(
+                context=context, dispatcher=self, handler_type=handler_type
+            )
 
             if self._run_logic is RunLogic.ONE_RUN_PER_EVENT and result:
                 break
@@ -171,7 +189,10 @@ class Dispatcher:
 
         else:
             clients_list = [
-                self.prepare_client(client=client, clear_handlers=self._clear_on_prepare) for client in clients
+                self.prepare_client(
+                    client=client, clear_handlers=self._clear_on_prepare
+                )
+                for client in clients
             ]
 
         clients_list = self._clients + clients_list

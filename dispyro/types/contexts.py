@@ -2,7 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from typing import Any, AsyncGenerator, Dict
 
-from pyrogram import Client
+from pyrogram.client import Client
 
 import dispyro
 
@@ -23,4 +23,6 @@ class UpdateContext:
     client: Client
     update: Update
     data: Dict[str, Any]
-    middlewares_context: MiddlewaresContext = field(default_factory=lambda: defaultdict(MiddlewareContext))
+    middlewares_context: MiddlewaresContext = field(
+        default_factory=lambda: defaultdict(MiddlewareContext)
+    )

@@ -15,7 +15,8 @@
 
 from typing import List, Optional
 
-from pyrogram import Client, types
+from pyrogram import types
+from pyrogram.client import Client
 
 import dispyro
 
@@ -30,14 +31,16 @@ from .types.signatures import (
     InlineQueryHandlerCallback,
     MessageHandlerCallback,
     PollHandlerCallback,
+    PriorityFactory,
     RawUpdateHandlerCallback,
     UserStatusHandlerCallback,
-    PriorityFactory,
 )
 from .utils import safe_call
 
+
 def default_priority_factory(handler: "Handler", router: "dispyro.Router") -> int:
     return 1
+
 
 class Handler:
     _priority_factory: PriorityFactory | None = None
@@ -83,7 +86,7 @@ class Handler:
         if not filters_passed:
             return
 
-        await self.callback(client, update, **deps) # pyright: ignore [reportArgumentType]
+        await self.callback(client, update, **deps)  # pyright: ignore [reportArgumentType]
         self._triggered = True
 
     def __repr__(self) -> str:

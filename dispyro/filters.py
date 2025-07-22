@@ -1,4 +1,4 @@
-from pyrogram import Client
+from pyrogram.client import Client
 from pyrogram.filters import Filter as PyrogramFilter
 
 from .types import AnyFilter, Update
@@ -52,14 +52,18 @@ class AndFilter(Filter):
 
     async def __call__(self, client: Client, update: Update, **deps) -> bool:
         left_value = await self._left(
-            client, update, **deps  # pyright: ignore [reportArgumentType]
+            client,
+            update,
+            **deps,  # pyright: ignore [reportArgumentType]
         )
 
         if not left_value:
             return False
 
         right_value = await self._right(
-            client, update, **deps  # pyright: ignore [reportArgumentType]
+            client,
+            update,
+            **deps,  # pyright: ignore [reportArgumentType]
         )
 
         return left_value and right_value
@@ -78,14 +82,18 @@ class OrFilter(Filter):
 
     async def __call__(self, client: Client, update: Update, **deps) -> bool:
         left_value = await self._left(
-            client, update, **deps  # pyright: ignore [reportArgumentType]
+            client,
+            update,
+            **deps,  # pyright: ignore [reportArgumentType]
         )
 
         if left_value:
             return True
 
         right_value = await self._right(
-            client, update, **deps  # pyright: ignore [reportArgumentType]
+            client,
+            update,
+            **deps,  # pyright: ignore [reportArgumentType]
         )
 
         return left_value or right_value
