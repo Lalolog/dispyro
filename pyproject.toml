@@ -15,7 +15,7 @@ description = "Improved dispatching for Pyrogram"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
-    "pyrogram>=2.0"
+    "kurigram"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
